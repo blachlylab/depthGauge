@@ -1,0 +1,13 @@
+{
+	"name": "depthgauge",
+	"authors": [
+		"Thomas Gregory"
+	],
+	"description": "A minimal D application.",
+	"license": "proprietary",
+	"sourcePaths":["source","BioD/bio","BioD/contrib"],
+	"buildRequirements":["allowWarnings"],
+	"__dependencies": {
+		"undead": "~>1.0.9"
+	}
+}
