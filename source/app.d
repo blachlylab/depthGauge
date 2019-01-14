@@ -1,9 +1,13 @@
 import std.stdio;
 import std.algorithm.searching:until;
+import std.algorithm.iteration:filter;
+import std.algorithm:map;
+import std.range:array;
 import std.path:buildPath;
 import std.conv:to;
 
 import bio.std.hts.bam.reader:BamReader;
+import bio.std.hts.bam.multireader:MultiBamReader;
 import bio.std.hts.bam.pileup;
 
 import csv;
@@ -21,15 +25,15 @@ void main(string[] args)
 
 }
 
-auto depth_at_pos(ref BamReader bam,string chr,uint pos){
-	return bam[chr][pos..pos+1].makePileup(true,pos,pos,false).front.coverage;
+auto depth_at_pos(ref MultiBamReader bam,string sample,string chr,uint pos){
+	return bam[chr][pos..pos+1].filter!(x=>x["RG"]==sample).makePileup(true,pos,pos,false).front.coverage;
 }
 
 void getDepths(ref Table t,string prefix){
+	auto bam = new MultiBamReader(t.samples.map!(x=>buildPath(prefix,x~".bam")).array);
 	foreach(j,sample;t.samples){
-		auto bam = new BamReader(buildPath(prefix,sample~".bam"));
 		foreach(i,rec;t.records){
-			t.matrix[i][j]=depth_at_pos(bam,rec.chr.idup,rec.pos);
+			t.matrix[i][j]=depth_at_pos(bam,sample,rec.chr.idup,rec.pos);
 		}
 	}
 }
