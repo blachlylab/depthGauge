@@ -7,9 +7,7 @@ import std.range:array;
 import std.path:buildPath;
 import std.conv:to;
 import std.parallelism:parallel;
-
-import bio.std.hts.bam.multireader:MultiBamReader;
-import bio.std.hts.bam.pileup;
+import dhtslib.sam:SAMFile;
 
 import csv;
 void main(string[] args)
@@ -26,18 +24,18 @@ void main(string[] args)
 
 }
 
-auto depth_at_pos(ref MultiBamReader bam,string sample,int chr,uint pos){
+auto depth_at_pos(ref SAMFile bam,int chr,uint pos){
 	//return bam[chr][pos..pos+1].makePileup(true,pos,pos,false).front.coverage;
-	return bam[bam.reference(chr).name][pos..pos+1].filter!(x=>x["RG"]==sample).map!(x=>x.name).array.sort.uniq.count;
+	return bam.query(chr,pos,pos+1).count;
 }
 
 void getDepths(ref Table t,string prefix){
-	foreach(i,rec;t.records.sort.array){
-		auto mbam = new MultiBamReader(t.samples.map!(x=>buildPath(prefix,x~".bam")).array);
-		foreach(j,sample;t.samples){
-			t.matrix[i][j]=depth_at_pos(mbam,sample,rec.chr,rec.pos);
+	foreach(j,sample;parallel(t.samples)){
+		auto bam = SAMFile(buildPath(prefix,sample~".bam"));
+		foreach(i,rec;t.records.sort.array){
+			t.matrix[i][j]=depth_at_pos(bam,rec.chr,rec.pos);
 		}
-		writeln(rec);
+		writeln(sample);
 	}
 }
 
