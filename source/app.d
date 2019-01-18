@@ -31,7 +31,7 @@ auto depth_at_pos(ref SAMFile bam,int chr,uint pos){
 
 void getDepths(ref Table t,string prefix){
 	foreach(j,sample;parallel(t.samples)){
-		auto bam = SAMFile(buildPath(prefix,sample~".bam"));
+		auto bam = SAMFile(buildPath(prefix,sample~".bam"),0);
 		foreach(i,rec;t.records.sort.array){
 			t.matrix[i][j]=depth_at_pos(bam,rec.chr,rec.pos);
 		}
