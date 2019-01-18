@@ -12,4 +12,17 @@
 			"path":"../dhtslib"
 		}
 	},
+    "configurations":[
+        {
+            "name":"shared",
+            "targetType": "executable"
+        },{
+            "name":"static",
+            "targetType": "executable",
+            "libs":["curl","crypto"],
+            "subConfigurations": {
+                "dhtslib":"source-static"
+            }
+        }
+    ]
 }
