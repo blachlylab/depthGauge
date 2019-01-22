@@ -8,9 +8,9 @@ import std.array:array,appender,join;
 import std.algorithm.iteration:each,map;
 import std.range;
 import std.traits:ReturnType;
+import std.string:fromStringz;
+import dhtslib.sam:SAMFile;
 
-import bio.std.hts.sam.header:SamHeader;
-import bio.std.hts.bam.reader:BamReader;
 import std.path;
 
 struct Table {
@@ -18,27 +18,29 @@ struct Table {
     string[] samples;
     Record[] records;
     uint[string] contigs;
-    SamHeader samheader;
+    SAMFile * sam;
 
     File f;
     string delim;
     ReturnType!createMatrix matrix;
-    this(string filename,string prefix,int startSamples){
-        this(filename,startSamples,prefix,"\t");
+    this(string filename,int startSamples){
+        this(filename,startSamples,"\t");
     }
-    this(string filename,int startSamples,string prefix, string delim){
+    this(string filename,int startSamples, string delim){
         f=File(filename);
         this.delim=delim;
-        parse(startSamples,prefix);
+        parseSamples(startSamples);
     }
-    void parse(int startSamples,string prefix){
+    void parseSamples(int startSamples){
         auto lines=f.byLineCopy();
         //set header
         header=lines.front.splitter(delim).array;
         //create samples
         samples=header[startSamples..$];
-        auto bam=new BamReader(buildPath(prefix,samples[0]~".bam"));
-        samheader=bam.header();
+    }
+    void parseRecords(SAMFile * sam,int startSamples){
+        auto lines=f.byLineCopy();
+        this.sam=sam;
         //debug writeln(header);
         //debug writeln(samples);
         lines.popFront;
@@ -46,14 +48,15 @@ struct Table {
         foreach(line;lines){
             auto split=line.splitter(delim);
             auto rec=split.take(startSamples).array;
-            records~=Record(rec,samheader);
+            records~=Record(rec,sam);
         }
         matrix=createMatrix();
     }
+
     void write(File f){
         f.writeln(join(header,delim));
         foreach(i,rec;enumerate(records.sort)){
-            f.writeln(join([samheader.getSequence(rec.chr).name,rec.pos.to!(string)]~rec.extra~matrix[i][].map!(x=>x.to!(string)).array,delim));
+            f.writeln(join([fromStringz(sam.header.target_name[rec.chr]).idup,rec.pos.to!(string)]~rec.extra~matrix[i][].map!(x=>x.to!(string)).array,delim));
         }
     }
     auto createMatrix(){
@@ -74,8 +77,8 @@ struct Record {
     //0-based
     uint pos;
     string[] extra;
-    this(string[] line,ref SamHeader samheader){
-        chr=samheader.getSequenceIndex(line.front);
+    this(string[] line,SAMFile * sam){
+        chr=sam.target_id(line.front);
         line.popFront;
         //convert from 1-based to 0-based
         pos=line.front.to!uint-1;

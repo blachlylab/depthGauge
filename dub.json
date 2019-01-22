@@ -5,8 +5,7 @@
 	],
 	"description": "A minimal D application.",
 	"license": "proprietary",
-	"sourcePaths":["source","BioD/bio","BioD/contrib"],
-	"buildRequirements":["allowWarnings"],
+	"sourcePaths":["source"],
 	"dependencies": {
 		"dhtslib": {
 			"path":"../dhtslib"

@@ -29,7 +29,9 @@ void main(string[] args)
 		if(threads!=0){
 			defaultPoolThreads(threads);
 		}
-		auto t =Table(args[1],args[3],args[2].to!int-1);
+		auto t =Table(args[1],args[2].to!int-1);
+		SAMFile s=SAMFile(buildPath(args[3],t.samples[0]~".bam"),0);
+		t.parseRecords(&s,args[2].to!int-1);
 		getDepths(t,args[3]);
 		File f = File(args[4],"w");
 		t.write(f);
