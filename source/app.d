@@ -26,7 +26,7 @@ void main(string[] args)
 
 auto depth_at_pos(ref SAMFile bam,int chr,uint pos){
 	//return bam[chr][pos..pos+1].makePileup(true,pos,pos,false).front.coverage;
-	return bam.query(chr,pos,pos+1).count;
+	return bam[chr,pos].count;
 }
 
 void getDepths(ref Table t,string prefix){
