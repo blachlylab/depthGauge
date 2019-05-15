@@ -7,9 +7,7 @@
 	"license": "proprietary",
 	"sourcePaths":["source"],
 	"dependencies": {
-		"dhtslib": {
-			"path":"../dhtslib"
-		}
+		"dhtslib": "~>0.6.0"
 	},
     "configurations":[
         {
