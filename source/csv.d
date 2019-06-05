@@ -43,7 +43,7 @@ struct Table {
         this.sam=sam;
         //debug writeln(header);
         //debug writeln(samples);
-        lines.popFront;
+        //lines.popFront;
         //create records
         foreach(line;lines){
             auto split=line.splitter(delim);
@@ -56,7 +56,7 @@ struct Table {
     void write(File f){
         f.writeln(join(header,delim));
         foreach(i,rec;enumerate(records.sort)){
-            f.writeln(join([fromStringz(sam.header.target_name[rec.chr]).idup,rec.pos.to!(string)]~rec.extra~matrix[i][].map!(x=>x.to!(string)).array,delim));
+            f.writeln(join([fromStringz(sam.header.target_name[rec.chr]).idup,(rec.pos+1).to!(string)]~rec.extra~matrix[i][].map!(x=>x.to!(string)).array,delim));
         }
     }
     auto createMatrix(){
